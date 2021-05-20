@@ -38,12 +38,28 @@ def initialize_cards():
     cardH1 = Card('H')
     cardH2 = Card('H')
     cardList = [cardA1, cardA2, cardB1, cardB2, cardC1, cardC2, cardD1, cardD2, cardE1, cardE2, cardF1, cardF2, cardG1, cardG2, cardH1, cardH2]
-    cardPositions = set_positions(cardList)
+    return set_positions(cardList)
 
-# function takes list of card
+# function takes list of card objects and randomizes positions in list
 def set_positions(cards):
-    cardsCopy = cards.copy()
     return list(random.sample(cards, 16))
 
+# make function to take player guess
+def get_guess(num):
+    if num == 1:
+        return input('Enter the index of the first card you want to reveal: ')
+    else:
+        return input('Enter the index of the second card you want to reveal: ')
+
+# function sets specified card to selected
+# takes the list of cards in play and the index of the player chosen card as parameters
+def reveal_card(cards, index):
+    cards[index].setSelected()
+
 if __name__ == '__main__':
-    initialize_cards()
+    cardsInPlay = initialize_cards()
+    while len(cardGrid) != 0:
+        guess1 = get_guess(1)
+        reveal_card(guess1)
+        guess2 = get_guess(2)
+        reveal_card(guess2)
