@@ -29,6 +29,8 @@ class Card:
             return True
         return False
     def reveal(self):
+        if self.is_matched():
+            return 'x'
         if self.selected == True:
             return self.letter
         return '-'
@@ -63,15 +65,21 @@ def set_positions(cards, numCards):
 # make function to take player guess
 def get_guess(cards, num, limit):
     if num == 1:
-        playerGuess = int(input('Enter the index of the first card you want to reveal: '))
-        while playerGuess < 1 or playerGuess > 16 or cards[playerGuess].is_matched():
-            playerGuess = int(input('Enter the index of the first card you want to reveal: '))
-        return playerGuess
+        playerGuess = 0
+        while playerGuess < 1 or playerGuess > 16 or cards[playerGuess-1].is_matched():
+            try:
+                playerGuess = int(input('Enter the index of the first card you want to reveal: '))
+            except ValueError:
+                continue
+        return playerGuess - 1
     else:
-        playerGuess = int(input('Enter the index of the second card you want to reveal: '))
-        while playerGuess < 1 or playerGuess > 16 or cards[playerGuess].is_selected() or cards[playerGuess].is_matched():
-            playerGuess = int(input('Enter the index of the second card you want to reveal: '))
-        return playerGuess
+        playerGuess = 0
+        while playerGuess < 1 or playerGuess > 16 or cards[playerGuess-1].is_selected() or cards[playerGuess-1].is_matched():
+            try:
+                playerGuess = int(input('Enter the index of the second card you want to reveal: '))
+            except ValueError:
+                continue
+        return playerGuess - 1
 
 def print_header():
     headerStr = '''
@@ -82,20 +90,66 @@ def print_header():
     '''
     print(headerStr.center(55))
 
-def print_cards():
-    pass
+# functions prints a grid with the 12 cards and their respective indexes
+def print_cards(cards):
+    indexCounter = 0
+    for i in range(1, 5):
+        cardRow = f'{cards[indexCounter].reveal()}\t{cards[indexCounter+1].reveal()}\t{cards[indexCounter+2].reveal()}\t{cards[indexCounter+3].reveal()}'
+        indexRow = f'{indexCounter+1}\t{indexCounter+2}\t{indexCounter+3}\t{indexCounter+4}\n'
+        print(cardRow.center(40))
+        if i < 3:
+            print(indexRow.center(40))
+        else:
+            print(indexRow.center(44))
+        indexCounter = indexCounter + 4
+
+# function sets all selected cards from previous turn to unselected to reset them for next turn
+# takes list containing all cards as parameter
+def unselect_all(cards):
+    for c in cards:
+        if c.is_selected():
+            c.set_unselected()
+
+# function loops through list containing all cards and checks if they are all matched
+# takes list of cards as parameter
+# returns True if all cards matched, otherwise returns False
+def check_all_matched(cards, turn):
+    for c in cards:
+        if c.is_matched() == False:
+            return False
+    print(f'Congradulations you\'ve found all the matching cards in {turn} turns!')
+    return True
+
+def print_turn(turn, points):
+    print('-' * 55)
+    print(f'[Turn {turn}: {points}pts]')
 
 # main code body, calls other functions to perform operations
 if __name__ == '__main__':
     print_header()
+    # declare variables used in game
     playerPoints = 0
+    turnCounter = 1
+    guess1, guess2 = 0, 0
+    # initialize list containing cards with randomized positions
     cardsInPlay = initialize_cards()
-    while len(cardsInPlay) != 0:
-        guess1 = get_guess(cardsInPlay.copy(), 1, 16)
-        cardsInPlay[guess1].set_selected()
-        guess2 = get_guess(cardsInPlay.copy(), 2, 16)
-        cardsInPlay[guess2].set_selected()
+    while check_all_matched(cardsInPlay, turnCounter) == False:
+        for i in range(1, 3):
+            print_turn(turnCounter, playerPoints)
+            print_cards(cardsInPlay)
+            if i == 1:
+                guess1 = get_guess(cardsInPlay.copy(), i, 16)
+                cardsInPlay[guess1].set_selected()
+            if i == 2:
+                guess2 = get_guess(cardsInPlay.copy(), i, 16)
+                cardsInPlay[guess2].set_selected()
+        print_cards(cardsInPlay)
         if cardsInPlay[guess1].letter == cardsInPlay[guess2].letter:
             cardsInPlay[guess1].set_matched()
             cardsInPlay[guess2].set_matched()
             playerPoints = playerPoints + 1
+            print(f'+1 points - you found a matching pair!\n[You now have {playerPoints} points]')
+        else:
+            cardsInPlay[guess1].set_unselected()
+            cardsInPlay[guess2].set_unselected()
+        turnCounter = turnCounter + 1
