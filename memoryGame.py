@@ -69,6 +69,7 @@ def get_guess(cards, num, limit):
         while playerGuess < 1 or playerGuess > 16 or cards[playerGuess-1].is_matched():
             try:
                 playerGuess = int(input('Enter the index of the first card you want to reveal: '))
+                print('\n')
             except ValueError:
                 continue
         return playerGuess - 1
@@ -77,6 +78,7 @@ def get_guess(cards, num, limit):
         while playerGuess < 1 or playerGuess > 16 or cards[playerGuess-1].is_selected() or cards[playerGuess-1].is_matched():
             try:
                 playerGuess = int(input('Enter the index of the second card you want to reveal: '))
+                print('\n')
             except ValueError:
                 continue
         return playerGuess - 1
@@ -87,6 +89,8 @@ def print_header():
     ---There are 8 pairs of cards with matching letters---
     ---Finding the matching pairs to earn points!---
     ---Remember you can only turn over 2 cards at a time---
+    ---> x = matched card---
+    ---> - = face down card---
     '''
     print(headerStr.center(55))
 
@@ -133,9 +137,9 @@ if __name__ == '__main__':
     guess1, guess2 = 0, 0
     # initialize list containing cards with randomized positions
     cardsInPlay = initialize_cards()
+    print_turn(turnCounter, playerPoints)
     while check_all_matched(cardsInPlay, turnCounter) == False:
         for i in range(1, 3):
-            print_turn(turnCounter, playerPoints)
             print_cards(cardsInPlay)
             if i == 1:
                 guess1 = get_guess(cardsInPlay.copy(), i, 16)
@@ -153,3 +157,4 @@ if __name__ == '__main__':
             cardsInPlay[guess1].set_unselected()
             cardsInPlay[guess2].set_unselected()
         turnCounter = turnCounter + 1
+        print_turn(turnCounter, playerPoints)
