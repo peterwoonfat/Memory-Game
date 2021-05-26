@@ -5,8 +5,25 @@
 
 # import modules used for memory game
 import random
+import tkinter as tk
 
-# declare initialize class for card objects
+# declare class containing gui component objects and functions to modify gui
+# add changing between frames (intro w/ rules, game, scoreboard) in future
+# can use Toplevel() to create new window displaying rules and high score respectively
+class Window:
+    def __init__(self):
+        root = tk.Tk()
+        root.title('MEMORY GAME')
+        mainFrame = tk.Frame(root)
+        mainFrame.pack(pady=10, padx=10)
+        turnStr = tk.StringVar()
+        turnLabel = tk.Label(mainFrame, textvariable=turnStr, underline=1).grid(row=0, column=0)
+    def update_turnLabel(self, turn, points):
+        self.turnStr.set(f'Turn {turn} - {points}pts')
+    def set_card_grid(self, cards):
+        pass
+
+# declare class for card objects
 # player can select up to 2 cards at once, stored in a list
 # when card is selected it is turned face up until either matching pair found then it dissappears or unsuccessful match and both cards unselected
 class Card:
@@ -83,14 +100,15 @@ def get_guess(cards, num, limit):
                 continue
         return playerGuess - 1
 
+# function prints a header introducing the game
 def print_header():
     headerStr = '''
     ---Welcome to Peter's Memory Game!---
     ---There are 8 pairs of cards with matching letters---
     ---Finding the matching pairs to earn points!---
     ---Remember you can only turn over 2 cards at a time---
-    ---> x = matched card---
-    ---> - = face down card---
+    --- > x = matched card---
+    --- > - = face down card---
     '''
     print(headerStr.center(55))
 
@@ -124,6 +142,7 @@ def check_all_matched(cards, turn):
     print(f'Congradulations you\'ve found all the matching cards in {turn} turns!')
     return True
 
+# function prints the current turn and current number of points player has
 def print_turn(turn, points):
     print('-' * 55)
     print(f'[Turn {turn}: {points}pts]')
@@ -138,6 +157,7 @@ if __name__ == '__main__':
     # initialize list containing cards with randomized positions
     cardsInPlay = initialize_cards()
     print_turn(turnCounter, playerPoints)
+    # loop to ask player for guesses until all cards successfully matched
     while check_all_matched(cardsInPlay, turnCounter) == False:
         for i in range(1, 3):
             print_cards(cardsInPlay)
@@ -148,6 +168,7 @@ if __name__ == '__main__':
                 guess2 = get_guess(cardsInPlay.copy(), i, 16)
                 cardsInPlay[guess2].set_selected()
         print_cards(cardsInPlay)
+        # check if cards player guessed are match and update points if so
         if cardsInPlay[guess1].letter == cardsInPlay[guess2].letter:
             cardsInPlay[guess1].set_matched()
             cardsInPlay[guess2].set_matched()
