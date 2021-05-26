@@ -11,16 +11,24 @@ import tkinter as tk
 # add changing between frames (intro w/ rules, game, scoreboard) in future
 # can use Toplevel() to create new window displaying rules and high score respectively
 class Window:
-    def __init__(self):
-        root = tk.Tk()
-        root.title('MEMORY GAME')
-        mainFrame = tk.Frame(root)
+    def __init__(self, parent):
+        parent.title('MEMORY GAME')
+        mainFrame = tk.Frame(parent)
         mainFrame.pack(pady=10, padx=10)
         turnStr = tk.StringVar()
         turnLabel = tk.Label(mainFrame, textvariable=turnStr, underline=1).grid(row=0, column=0)
     def update_turnLabel(self, turn, points):
         self.turnStr.set(f'Turn {turn} - {points}pts')
     def set_card_grid(self, cards):
+        pass
+
+class IntroWindow:
+    def __init__(self, parent):
+        introWindow = tk.Toplevel()
+        # add label with rules here
+        beginBtn = Button(parent, text='Begin', command=exit_intro)
+        beginBtn.pack()
+    def exit_intro(self):
         pass
 
 # declare class for card objects
@@ -147,35 +155,41 @@ def print_turn(turn, points):
     print('-' * 55)
     print(f'[Turn {turn}: {points}pts]')
 
-# main code body, calls other functions to perform operations
+# # main code body, calls other functions to perform operations
+# if __name__ == '__main__':
+#     print_header()
+#     # declare variables used in game
+#     playerPoints = 0
+#     turnCounter = 1
+#     guess1, guess2 = 0, 0
+#     # initialize list containing cards with randomized positions
+#     cardsInPlay = initialize_cards()
+#     print_turn(turnCounter, playerPoints)
+#     # loop to ask player for guesses until all cards successfully matched
+#     while check_all_matched(cardsInPlay, turnCounter) == False:
+#         for i in range(1, 3):
+#             print_cards(cardsInPlay)
+#             if i == 1:
+#                 guess1 = get_guess(cardsInPlay.copy(), i, 16)
+#                 cardsInPlay[guess1].set_selected()
+#             if i == 2:
+#                 guess2 = get_guess(cardsInPlay.copy(), i, 16)
+#                 cardsInPlay[guess2].set_selected()
+#         print_cards(cardsInPlay)
+#         # check if cards player guessed are match and update points if so
+#         if cardsInPlay[guess1].letter == cardsInPlay[guess2].letter:
+#             cardsInPlay[guess1].set_matched()
+#             cardsInPlay[guess2].set_matched()
+#             playerPoints = playerPoints + 1
+#             print(f'+1 points - you found a matching pair!\n[You now have {playerPoints} points]')
+#         else:
+#             cardsInPlay[guess1].set_unselected()
+#             cardsInPlay[guess2].set_unselected()
+#         turnCounter = turnCounter + 1
+#         print_turn(turnCounter, playerPoints)
+
 if __name__ == '__main__':
-    print_header()
-    # declare variables used in game
-    playerPoints = 0
-    turnCounter = 1
-    guess1, guess2 = 0, 0
-    # initialize list containing cards with randomized positions
-    cardsInPlay = initialize_cards()
-    print_turn(turnCounter, playerPoints)
-    # loop to ask player for guesses until all cards successfully matched
-    while check_all_matched(cardsInPlay, turnCounter) == False:
-        for i in range(1, 3):
-            print_cards(cardsInPlay)
-            if i == 1:
-                guess1 = get_guess(cardsInPlay.copy(), i, 16)
-                cardsInPlay[guess1].set_selected()
-            if i == 2:
-                guess2 = get_guess(cardsInPlay.copy(), i, 16)
-                cardsInPlay[guess2].set_selected()
-        print_cards(cardsInPlay)
-        # check if cards player guessed are match and update points if so
-        if cardsInPlay[guess1].letter == cardsInPlay[guess2].letter:
-            cardsInPlay[guess1].set_matched()
-            cardsInPlay[guess2].set_matched()
-            playerPoints = playerPoints + 1
-            print(f'+1 points - you found a matching pair!\n[You now have {playerPoints} points]')
-        else:
-            cardsInPlay[guess1].set_unselected()
-            cardsInPlay[guess2].set_unselected()
-        turnCounter = turnCounter + 1
-        print_turn(turnCounter, playerPoints)
+    root = tk.Tk()
+    mainInterface = Window(root)
+    introWindow = IntroWindow(root)
+    root.mainloop()
