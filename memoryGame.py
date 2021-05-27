@@ -6,29 +6,27 @@
 # import modules used for memory game
 import random
 import tkinter as tk
+import time
 
 # declare class containing gui component objects and functions to modify gui
 # add changing between frames (intro w/ rules, game, scoreboard) in future
 # can use Toplevel() to create new window displaying rules and high score respectively
-class Window:
+class Window():
     def __init__(self, parent):
         parent.title('MEMORY GAME')
-        mainFrame = tk.Frame(parent)
-        mainFrame.pack(pady=10, padx=10)
-        turnStr = tk.StringVar()
-        turnLabel = tk.Label(mainFrame, textvariable=turnStr, underline=1).grid(row=0, column=0)
-    def update_turnLabel(self, turn, points):
-        self.turnStr.set(f'Turn {turn} - {points}pts')
-    def set_card_grid(self, cards):
+        self.mainFrame = tk.Frame(parent)
+        self.mainFrame.pack(pady=10, padx=10)
+        self.timerLabel = tk.Label(self.mainFrame, text='', underline=1)
+        self.timerLabel.grid(row=0, column=0)
+        self.update_timer(parent)
+    def update_timer(self, parent):
+        self.currentTime = time.strftime('%M:%S')
+        self.timerLabel.configure(text=self.currentTime)
+        while time.time() < 300000:
+            parent.after(1000, self.update_timer)
+    def update_score(self):
         pass
-
-class IntroWindow:
-    def __init__(self, parent):
-        introWindow = tk.Toplevel()
-        # add label with rules here
-        beginBtn = Button(parent, text='Begin', command=exit_intro)
-        beginBtn.pack()
-    def exit_intro(self):
+    def set_card_grid(self, cards):
         pass
 
 # declare class for card objects
@@ -191,5 +189,4 @@ def print_turn(turn, points):
 if __name__ == '__main__':
     root = tk.Tk()
     mainInterface = Window(root)
-    introWindow = IntroWindow(root)
     root.mainloop()
