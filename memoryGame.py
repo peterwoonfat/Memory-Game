@@ -32,7 +32,9 @@ class Window(ttk.Frame):
 
     def set_initial_ui(self, container):
         self.turnLabel = ttk.Label(container, text='Turn 1 - 0pts')
-        self.turnLabel.grid(row=0, column=0, padx=10, pady=10)
+        self.turnLabel.grid(row=0, column=0, padx=10, pady=10) 
+        self.statusLabel = ttk.Label(container, text='>>Choose a card<<')
+        self.statusLabel.grid(row=0, column=2, columnspan=3, pady=10)
         # declare buttons and labels used to represent cards and store in list, cards begin face up for first 5s
         self.cardBtn1 = ttk.Button(container, text=self.cardsList[0].letter, command=lambda:self.reveal(0, container), state=DISABLED)
         self.cardBtn1.grid(row=1, column=1, ipady=30, padx=10)
@@ -101,8 +103,12 @@ class Window(ttk.Frame):
         self.cardBtnList = [self.cardBtn1, self.cardBtn2, self.cardBtn3, self.cardBtn4, self.cardBtn5, self.cardBtn6, self.cardBtn7, self.cardBtn8, self.cardBtn9, self.cardBtn10, self.cardBtn11, self.cardBtn12, self.cardBtn13, self.cardBtn14, self.cardBtn15, self.cardBtn16]
         self.CardLblList = [self.cardLbl1, self.cardLbl2, self.cardLbl3, self.cardLbl4, self.cardLbl5, self.cardLbl7, self.cardLbl8, self.cardLbl9, self.cardLbl10, self.cardLbl11, self.cardLbl12, self.cardLbl13, self.cardLbl14, self.cardLbl15, self.cardLbl16]
     
+    # function updates the text of the turn and points label
     def update_turnLabel(self):
         self.turnLabel.configure(text=f'Turn {self.turn} - {self.points}pts')
+
+    def update_statusLabel(self, status):
+        self.statusLabel.configure(text=status)
     
     # after a set time, function is called to set all cards face down to begin game
     def facedown_all(self):
@@ -128,6 +134,8 @@ class Window(ttk.Frame):
         self.cardBtnList[index].configure(text=self.cardsList[index].letter, state=DISABLED)
         self.cardsList[index].set_selected()
         self.selectedList.append(index)
+        if len(self.selectedList) == 1:
+            self.update_statusLabel('>>Choose a second card<<')
         if len(self.selectedList) == 2:
             self.check_pair_match(container)
 
@@ -166,6 +174,7 @@ class Window(ttk.Frame):
     # function returns true if the 2 selected cards have matching letters, otherwise returns false
     def check_pair_match(self, container):
         if self.cardsList[self.selectedList[0]].letter == self.cardsList[self.selectedList[1]].letter:
+            self.update_statusLabel('>>You found a match! Choose another card<<')
             self.cardsList[self.selectedList[0]].set_unselected()
             self.cardsList[self.selectedList[1]].set_unselected()
             self.cardsList[self.selectedList[0]].set_matched()
@@ -174,10 +183,9 @@ class Window(ttk.Frame):
             self.cardBtnList[self.selectedList[1]].configure(text=f'{self.cardsList[self.selectedList[1]].letter}\n[matched]')
             self.points += 1
             self.selectedList.clear()
-            # if self.check_all_matched():
-            #     pass
         else:
             container.after(500, self.unreveal)
+            self.update_statusLabel('>>Choose a card<<')
         self.turn += 1
         self.update_turnLabel()
 
