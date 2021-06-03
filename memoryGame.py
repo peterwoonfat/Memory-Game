@@ -128,17 +128,15 @@ class Window(ttk.Frame):
         self.cardBtnList[index].configure(text=self.cardsList[index].letter, state=DISABLED)
         self.cardsList[index].set_selected()
         self.selectedList.append(index)
-        print(f'CARD ADDED - LEN {len(self.selectedList)}')
         if len(self.selectedList) == 2:
             self.check_pair_match(container)
-            #self.check_two_selected()
 
     def unreveal(self):
-        print(f'FINAL LEN {len(self.selectedList)}')
         self.cardBtnList[self.selectedList[0]].configure(text='?', state=NORMAL)
         self.cardBtnList[self.selectedList[1]].configure(text='?', state=NORMAL)
         self.cardsList[self.selectedList[0]].set_unselected()
         self.cardsList[self.selectedList[1]].set_unselected()
+        self.selectedList.clear()
 
     # function creatles list of 16 cards (8 pairs) with a letter and their position in the grid
     def initialize_cards(self):
@@ -164,21 +162,6 @@ class Window(ttk.Frame):
     # function takes list of card objects and randomizes positions in list
     def set_positions(self, cards, numCards):
         return list(random.sample(cards, numCards))
-    
-    # function checks if user has selected 2 cards, if true then checks if match (if match then checks if all cards matched) and increments turn counter
-    # def check_two_selected(self):
-    #     selectedCount = 0
-    #     for c in self.cardsList:
-    #         if c.is_selected():
-    #             selectedCount += 1
-    #         if selectedCount == 2:
-    #             if self.check_pair_match():
-    #                 self.points += 1
-    #                 if self.check_all_matched():
-    #                     pass
-    #             self.turn += 1
-    #             self.update_turnLabel(self.turn, self.points)
-    #             break
 
     # function returns true if the 2 selected cards have matching letters, otherwise returns false
     def check_pair_match(self, container):
@@ -194,8 +177,7 @@ class Window(ttk.Frame):
             # if self.check_all_matched():
             #     pass
         else:
-            print(f'CHECK PRE LEN {len(self.selectedList)}')
-            container.after(1000, self.unreveal)
+            container.after(500, self.unreveal)
         self.turn += 1
         self.update_turnLabel()
 
