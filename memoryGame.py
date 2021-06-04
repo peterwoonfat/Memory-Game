@@ -5,6 +5,7 @@
 
 # import modules used for memory game
 import random
+import threading
 import tkinter as tk
 from tkinter import ttk
 from tkinter import messagebox
@@ -18,8 +19,18 @@ class App(tk.Tk):
     def __init__(self):
         super().__init__()
         self.title('MEMORY GAME')
-        self.style = ttk.Style(self)
-        self.style.configure('TButton', )
+        self.resizable(False, False)
+        #self.style = ttk.Style(self)
+        ttk.Style().configure('TButton', height=20, width=5, padding=2, relief='flat')
+
+        self.gameFrame = Window(self)
+        self.menuFrame = MainMenu(self)
+        self.frames = [self.gameFrame, self.menuFrame]
+        self.frames[0].tkraise()
+
+    # function makes menu frame visible
+    def show_menu(self):
+        pass
 
 class Window(ttk.Frame):
     def __init__(self, container):
@@ -29,12 +40,14 @@ class Window(ttk.Frame):
         self.selectedList = []
         self.set_initial_ui(container)
         container.after(4000, self.facedown_all)
+        # create a second thread to check whether selectedList has >3 elements
+        t2 = threading.Thread(target=self.check_selected_overflow)
 
     def set_initial_ui(self, container):
         self.turnLabel = ttk.Label(container, text='Turn 1 - 0pts')
         self.turnLabel.grid(row=0, column=0, padx=10, pady=10) 
         self.statusLabel = ttk.Label(container, text='>>Choose a card<<')
-        self.statusLabel.grid(row=0, column=2, columnspan=3, pady=10)
+        self.statusLabel.grid(row=0, column=2, columnspan=2, pady=10)
         # declare buttons and labels used to represent cards and store in list, cards begin face up for first 5s
         self.cardBtn1 = ttk.Button(container, text=self.cardsList[0].letter, command=lambda:self.reveal(0, container), state=DISABLED)
         self.cardBtn1.grid(row=1, column=1, ipady=30, padx=10)
@@ -179,13 +192,15 @@ class Window(ttk.Frame):
             self.cardsList[self.selectedList[1]].set_unselected()
             self.cardsList[self.selectedList[0]].set_matched()
             self.cardsList[self.selectedList[1]].set_matched()
-            self.cardBtnList[self.selectedList[0]].configure(text=f'{self.cardsList[self.selectedList[0]].letter}\n[matched]')
-            self.cardBtnList[self.selectedList[1]].configure(text=f'{self.cardsList[self.selectedList[1]].letter}\n[matched]')
+            self.cardBtnList[self.selectedList[0]].configure(text=f'{self.cardsList[self.selectedList[0]].letter.center(10)}\n[matched]')
+            self.cardBtnList[self.selectedList[1]].configure(text=f'{self.cardsList[self.selectedList[1]].letter.center(10)}\n[matched]')
             self.points += 1
             self.selectedList.clear()
         else:
             container.after(500, self.unreveal)
             self.update_statusLabel('>>Choose a card<<')
+        if self.check_all_matched():
+            pass
         self.turn += 1
         self.update_turnLabel()
 
@@ -195,6 +210,14 @@ class Window(ttk.Frame):
             if c.is_matched() == False:
                 return False
         return True
+
+    # function operates on a seperate thread and checks if more than 2 buttons are selected at once and resets them
+    def check_selected_overflow(self):
+        pass
+
+class MainMenu(ttk.LabelFrame):
+    def __init__(self, container, *args):
+        super().__init__(container)
 
 # declare class for card objects
 # player can select up to 2 cards at once, stored in a list
@@ -266,5 +289,4 @@ def show_rules():
 if __name__ == '__main__':
     show_rules()
     app = App()
-    gameFrame = Window(app)
     app.mainloop()
