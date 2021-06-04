@@ -11,37 +11,32 @@ from tkinter import ttk
 from tkinter import messagebox
 from tkinter.constants import DISABLED, NORMAL
 
-# declare class containing gui component objects and functions to modify gui
+# parent class for all GUI components of 2 other frames
 # add changing between frames (intro w/ rules, game, scoreboard) in future
-# can use Toplevel() to create new window displaying rules and high score respectively
-# grid: row 0 - 5, col 0 - 4
 class App(tk.Tk):
     def __init__(self):
         super().__init__()
         self.title('MEMORY GAME')
         self.resizable(False, False)
-        #self.style = ttk.Style(self)
-        ttk.Style().configure('TButton', height=20, width=5, padding=2, relief='flat')
 
         self.gameFrame = Window(self)
-        self.menuFrame = MainMenu(self)
+        self.menuFrame = MainMenu(self, self.gameFrame.turn, self.gameFrame.points, self.gameFrame.submitBool)
         self.frames = [self.gameFrame, self.menuFrame]
         self.frames[0].tkraise()
 
     # function makes menu frame visible
     def show_menu(self):
-        pass
+        self.frames[1].tkraise()
 
 class Window(ttk.Frame):
     def __init__(self, container):
         super().__init__(container)
+        ttk.Style().configure('TButton', height=15, width=5, padding=2, relief='flat')
         self.turn, self.points = 1, 0
         self.cardsList = self.initialize_cards()
         self.selectedList = []
         self.set_initial_ui(container)
         container.after(4000, self.facedown_all)
-        # create a second thread to check whether selectedList has >3 elements
-        t2 = threading.Thread(target=self.check_selected_overflow)
 
     def set_initial_ui(self, container):
         self.turnLabel = ttk.Label(container, text='Turn 1 - 0pts')
@@ -150,6 +145,7 @@ class Window(ttk.Frame):
         if len(self.selectedList) == 1:
             self.update_statusLabel('>>Choose a second card<<')
         if len(self.selectedList) == 2:
+            self.disable_all_btns()
             self.check_pair_match(container)
 
     def unreveal(self):
@@ -196,11 +192,14 @@ class Window(ttk.Frame):
             self.cardBtnList[self.selectedList[1]].configure(text=f'{self.cardsList[self.selectedList[1]].letter.center(10)}\n[matched]')
             self.points += 1
             self.selectedList.clear()
+            self.reenable_all_btns()
         else:
             container.after(500, self.unreveal)
+            self.reenable_all_btns()
             self.update_statusLabel('>>Choose a card<<')
         if self.check_all_matched():
-            pass
+            self.submitBool = messagebox.askyesno('Submit Score', 'Do you want to submit your score to be placed on the high scores ranking?')
+            container.show_menu()
         self.turn += 1
         self.update_turnLabel()
 
@@ -211,13 +210,25 @@ class Window(ttk.Frame):
                 return False
         return True
 
-    # function operates on a seperate thread and checks if more than 2 buttons are selected at once and resets them
-    def check_selected_overflow(self):
-        pass
+    # function disables all buttons so user can not choose more than 3 at once
+    # NOT WORKING PROPERLY
+    def disable_all_btns(self):
+        for i in range(0,16):
+            if self.cardsList[i].is_matched() == False:
+                self.cardBtnList[i].configure(state=DISABLED)
+
+    # function reenables all buttons so game can resume
+    # NOT WORKING PROPERLY
+    def reenable_all_btns(self):
+        for i in range(0,16):
+            if self.cardsList[i].is_matched() == False:
+                self.cardBtnList[i].configure(state=NORMAL)
 
 class MainMenu(ttk.LabelFrame):
-    def __init__(self, container, *args):
+    def __init__(self, container, turn, points, submitBool):
         super().__init__(container)
+        if submitBool:
+            pass
 
 # declare class for card objects
 # player can select up to 2 cards at once, stored in a list
@@ -252,39 +263,6 @@ def show_rules():
 
     >>When you press okay you will have 5 seconds to memorize the cards' positions<<
     ''')
-
-# # main code body, calls other functions to perform operations
-# if __name__ == '__main__':
-#     print_header()
-#     # declare variables used in game
-#     playerPoints = 0
-#     turnCounter = 1
-#     guess1, guess2 = 0, 0
-#     # initialize list containing cards with randomized positions
-#     cardsInPlay = initialize_cards()
-#     print_turn(turnCounter, playerPoints)
-#     # loop to ask player for guesses until all cards successfully matched
-#     while check_all_matched(cardsInPlay, turnCounter) == False:
-#         for i in range(1, 3):
-#             print_cards(cardsInPlay)
-#             if i == 1:
-#                 guess1 = get_guess(cardsInPlay.copy(), i, 16)
-#                 cardsInPlay[guess1].set_selected()
-#             if i == 2:
-#                 guess2 = get_guess(cardsInPlay.copy(), i, 16)
-#                 cardsInPlay[guess2].set_selected()
-#         print_cards(cardsInPlay)
-#         # check if cards player guessed are match and update points if so
-#         if cardsInPlay[guess1].letter == cardsInPlay[guess2].letter:
-#             cardsInPlay[guess1].set_matched()
-#             cardsInPlay[guess2].set_matched()
-#             playerPoints = playerPoints + 1
-#             print(f'+1 points - you found a matching pair!\n[You now have {playerPoints} points]')
-#         else:
-#             cardsInPlay[guess1].set_unselected()
-#             cardsInPlay[guess2].set_unselected()
-#         turnCounter = turnCounter + 1
-#         print_turn(turnCounter, playerPoints)
 
 if __name__ == '__main__':
     show_rules()
