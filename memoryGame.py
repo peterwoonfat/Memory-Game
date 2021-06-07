@@ -33,6 +33,7 @@ class Window(ttk.Frame):
         super().__init__(container)
         ttk.Style().configure('TButton', height=15, width=5, padding=2, relief='flat')
         self.turn, self.points = 1, 0
+        self.submitBool = None
         self.cardsList = self.initialize_cards()
         self.selectedList = []
         self.set_initial_ui(container)
@@ -227,8 +228,27 @@ class Window(ttk.Frame):
 class MainMenu(ttk.LabelFrame):
     def __init__(self, container, turn, points, submitBool):
         super().__init__(container)
+        self.replayBtn = ttk.Button(container, text='Play Again', command=self.reset_game)
+        self.replayBtn.grid(row=0, column=0)
+        self.quitBtn = ttk.Button(container, text='Quit', command=exit)
+        self.quitBtn.grid(row=1, column=0)
+        if submitBool:
+            self.nameEntry = ttk.Entry(container)
+            self.nameEntry.grid(row=2, column=0, rowspan=2)
+            self.nameEntry.insert(0, 'Enter username')
+            self.submitBtn = ttk.Button(container, text='Submit', command=self.submit_score, args=(turn, points))
+            self.submitBtn.grid(row=3, column=0)
+        open('highscores.txt', 'r')
         if submitBool:
             pass
+
+    def submit_score(self, turn, points):
+        self.HSFile = open('highscores.txt', 'a')
+        self.HSFile.write(f'{self.nameEntry.get()} {points} {turn}\n')
+        self.HSFile.close()
+
+    def reset_game(self):
+        pass
 
 # declare class for card objects
 # player can select up to 2 cards at once, stored in a list
