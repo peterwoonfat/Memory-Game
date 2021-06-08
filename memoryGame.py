@@ -123,33 +123,37 @@ class Window(ttk.LabelFrame):
     
     # after a set time, function is called to set all cards face down to begin game
     def facedown_all(self):
-        self.cardBtn1.configure(text='?', state=NORMAL)
-        self.cardBtn2.configure(text='?', state=NORMAL)
-        self.cardBtn3.configure(text='?', state=NORMAL)
-        self.cardBtn4.configure(text='?', state=NORMAL)
-        self.cardBtn5.configure(text='?', state=NORMAL)
-        self.cardBtn6.configure(text='?', state=NORMAL)
-        self.cardBtn7.configure(text='?', state=NORMAL)
-        self.cardBtn8.configure(text='?', state=NORMAL)
-        self.cardBtn9.configure(text='?', state=NORMAL)
-        self.cardBtn10.configure(text='?', state=NORMAL)
-        self.cardBtn11.configure(text='?', state=NORMAL)
-        self.cardBtn12.configure(text='?', state=NORMAL)
-        self.cardBtn13.configure(text='?', state=NORMAL)
-        self.cardBtn14.configure(text='?', state=NORMAL)
-        self.cardBtn15.configure(text='?', state=NORMAL)
-        self.cardBtn16.configure(text='?', state=NORMAL)
+        for b in self.cardBtnList:
+            b.configure(text='?', state=NORMAL)
+        # self.cardBtn1.configure(text='?', state=NORMAL)
+        # self.cardBtn2.configure(text='?', state=NORMAL)
+        # self.cardBtn3.configure(text='?', state=NORMAL)
+        # self.cardBtn4.configure(text='?', state=NORMAL)
+        # self.cardBtn5.configure(text='?', state=NORMAL)
+        # self.cardBtn6.configure(text='?', state=NORMAL)
+        # self.cardBtn7.configure(text='?', state=NORMAL)
+        # self.cardBtn8.configure(text='?', state=NORMAL)
+        # self.cardBtn9.configure(text='?', state=NORMAL)
+        # self.cardBtn10.configure(text='?', state=NORMAL)
+        # self.cardBtn11.configure(text='?', state=NORMAL)
+        # self.cardBtn12.configure(text='?', state=NORMAL)
+        # self.cardBtn13.configure(text='?', state=NORMAL)
+        # self.cardBtn14.configure(text='?', state=NORMAL)
+        # self.cardBtn15.configure(text='?', state=NORMAL)
+        # self.cardBtn16.configure(text='?', state=NORMAL)
     
     # when a card is selected (button pressed), show its letter and set state to disabled
     def reveal(self, index, container):
         self.cardBtnList[index].configure(text=self.cardsList[index].letter, state=DISABLED)
         self.cardsList[index].set_selected()
         self.selectedList.append(index)
+
         if len(self.selectedList) == 1:
             self.update_statusLabel('>>Choose a second card<<')
         if len(self.selectedList) == 2:
-            self.disable_all_btns()
             self.check_pair_match(container)
+        if len(self.selectedList) > 2:
+            self.reset_selected()
 
     def unreveal(self):
         self.cardBtnList[self.selectedList[0]].configure(text='?', state=NORMAL)
@@ -195,12 +199,11 @@ class Window(ttk.LabelFrame):
             self.cardBtnList[self.selectedList[1]].configure(text=f'{self.cardsList[self.selectedList[1]].letter.center(10)}\n[matched]')
             self.points += 1
             self.selectedList.clear()
-            self.reenable_all_btns()
         else:
             container.after(500, self.unreveal)
-            self.reenable_all_btns()
             self.update_statusLabel('>>Choose a card<<')
         if self.check_all_matched():
+            self.statusLabel.configure(text='Congradulations you found all the matching cards!')
             self.submitBool = messagebox.askyesno('Submit Score', 'Do you want to submit your score to be placed on the high scores ranking?')
             container.show_menu()
         self.turn += 1
@@ -215,22 +218,15 @@ class Window(ttk.LabelFrame):
 
     # function disables all buttons so user can not choose more than 3 at once
     # NOT WORKING PROPERLY
-    def disable_all_btns(self):
-        for i in range(0,16):
-            if self.cardsList[i].is_matched() == False:
-                self.cardBtnList[i].configure(state=DISABLED)
-
-    # function reenables all buttons so game can resume
-    # NOT WORKING PROPERLY
-    def reenable_all_btns(self):
-        for i in range(0,16):
-            if self.cardsList[i].is_matched() == False:
-                self.cardBtnList[i].configure(state=NORMAL)
+    def reset_selected(self):
+        for i in self.selectedList[2:]:
+            self.cardsList[i].set_unselected()
+            self.cardBtnList[i].configure(text='?', state=NORMAL)
 
 class MainMenu(ttk.LabelFrame):
     def __init__(self, container, turn, points, submitBool):
-        ttk.Style().configure('Menu.TLabelframe', relief='groove')
         menuFrame = tk.Frame(container, bd=3, relief='groove')
+        ttk.Style().configure('Menu.TLabelframe', relief='groove')
         super().__init__(container, labelwidget=menuFrame ,style='Menu.TLabelframe')
         self.grid(row=0, column=0, rowspan=8)
 
@@ -238,12 +234,14 @@ class MainMenu(ttk.LabelFrame):
         self.replayBtn.grid(row=0, column=0)
         self.quitBtn = ttk.Button(self, text='Quit', command=exit)
         self.quitBtn.grid(row=1, column=0, padx=8, pady=8)
+
         if submitBool:
             self.nameEntry = ttk.Entry(self)
             self.nameEntry.grid(row=2, column=0, rowspan=2)
             self.nameEntry.insert(0, 'Enter username')
             self.submitBtn = ttk.Button(container, text='Submit', command=self.submit_score, args=(turn, points))
             self.submitBtn.grid(row=3, column=0)
+        
         self.HSFile = open('highscores.txt', 'r')
         self.HSFile.close()
 
@@ -263,16 +261,21 @@ class Card:
         self.letter = letter
         self.selected = False
         self.matched = False
+   
     def set_selected(self):
         self.selected = True
+    
     def set_unselected(self):
         self.selected = False
+   
     def is_selected(self):
         if self.selected == True:
             return True
         return False
+    
     def set_matched(self):
         self.matched = True
+    
     def is_matched(self):
         if self.matched == True:
             return True
