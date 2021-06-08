@@ -5,7 +5,6 @@
 
 # import modules used for memory game
 import random
-import threading
 import tkinter as tk
 from tkinter import ttk
 from tkinter import messagebox
@@ -20,18 +19,19 @@ class App(tk.Tk):
         self.resizable(False, False)
 
         self.gameFrame = Window(self)
-        self.menuFrame = MainMenu(self, self.gameFrame.turn, self.gameFrame.points, self.gameFrame.submitBool)
-        self.frames = [self.gameFrame, self.menuFrame]
-        self.frames[0].tkraise()
 
     # function makes menu frame visible
     def show_menu(self):
-        self.frames[1].tkraise()
+        pass
+        self.menuFrame = MainMenu(self, self.gameFrame.turn, self.gameFrame.points, self.gameFrame.submitBool)
 
-class Window(ttk.Frame):
+class Window(ttk.LabelFrame):
     def __init__(self, container):
-        super().__init__(container)
+        gameFrame = tk.Frame(container)
+        super().__init__(container, labelwidget=gameFrame)
+        self.grid(row=0, column=1)
         ttk.Style().configure('TButton', height=15, width=5, padding=2, relief='flat')
+
         self.turn, self.points = 1, 0
         self.submitBool = None
         self.cardsList = self.initialize_cards()
@@ -44,6 +44,7 @@ class Window(ttk.Frame):
         self.turnLabel.grid(row=0, column=0, padx=10, pady=10) 
         self.statusLabel = ttk.Label(container, text='>>Choose a card<<')
         self.statusLabel.grid(row=0, column=2, columnspan=2, pady=10)
+
         # declare buttons and labels used to represent cards and store in list, cards begin face up for first 5s
         self.cardBtn1 = ttk.Button(container, text=self.cardsList[0].letter, command=lambda:self.reveal(0, container), state=DISABLED)
         self.cardBtn1.grid(row=1, column=1, ipady=30, padx=10)
@@ -77,6 +78,7 @@ class Window(ttk.Frame):
         self.cardBtn15.grid(row=7, column=3, ipady=30, padx=10)
         self.cardBtn16 = ttk.Button(container, text=self.cardsList[15].letter, command=lambda:self.reveal(15, container), state=DISABLED)
         self.cardBtn16.grid(row=7, column=4, ipady=30, padx=10)
+        
         self.cardLbl1 = ttk.Label(container, text='Card 1')
         self.cardLbl1.grid(row=2, column=1, pady=5)
         self.cardLbl2 = ttk.Label(container, text='Card 2')
@@ -227,20 +229,23 @@ class Window(ttk.Frame):
 
 class MainMenu(ttk.LabelFrame):
     def __init__(self, container, turn, points, submitBool):
-        super().__init__(container)
-        self.replayBtn = ttk.Button(container, text='Play Again', command=self.reset_game)
+        ttk.Style().configure('Menu.TLabelframe', relief='groove')
+        menuFrame = tk.Frame(container, bd=3, relief='groove')
+        super().__init__(container, labelwidget=menuFrame ,style='Menu.TLabelframe')
+        self.grid(row=0, column=0, rowspan=8)
+
+        self.replayBtn = ttk.Button(self, text='Play Again', command=self.reset_game)
         self.replayBtn.grid(row=0, column=0)
-        self.quitBtn = ttk.Button(container, text='Quit', command=exit)
-        self.quitBtn.grid(row=1, column=0)
+        self.quitBtn = ttk.Button(self, text='Quit', command=exit)
+        self.quitBtn.grid(row=1, column=0, padx=8, pady=8)
         if submitBool:
-            self.nameEntry = ttk.Entry(container)
+            self.nameEntry = ttk.Entry(self)
             self.nameEntry.grid(row=2, column=0, rowspan=2)
             self.nameEntry.insert(0, 'Enter username')
             self.submitBtn = ttk.Button(container, text='Submit', command=self.submit_score, args=(turn, points))
             self.submitBtn.grid(row=3, column=0)
-        open('highscores.txt', 'r')
-        if submitBool:
-            pass
+        self.HSFile = open('highscores.txt', 'r')
+        self.HSFile.close()
 
     def submit_score(self, turn, points):
         self.HSFile = open('highscores.txt', 'a')
