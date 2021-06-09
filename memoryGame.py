@@ -8,7 +8,7 @@ import random
 import tkinter as tk
 from tkinter import ttk
 from tkinter import messagebox
-from tkinter.constants import DISABLED, NORMAL
+from tkinter.constants import DISABLED, FLAT, GROOVE, NORMAL, SUNKEN
 
 # parent class for all GUI components of other 2 frames
 class App(tk.Tk):
@@ -21,101 +21,102 @@ class App(tk.Tk):
 
     # function makes menu frame visible
     def show_menu(self):
-        pass
         self.menuFrame = MainMenu(self, self.gameFrame.turn, self.gameFrame.points, self.gameFrame.submitBool)
+        self.menuFrame.tkraise()
 
 # class initializes GUI and backend components for the memory game
 # frame that player interacts with to play
 class Window(ttk.LabelFrame):
     def __init__(self, container):
-        gameFrame = tk.Frame(container)
-        super().__init__(container, labelwidget=gameFrame)
+        self.container = container
+        gameFrame = tk.Frame(self.container)
+        super().__init__(self.container, labelwidget=gameFrame)
         self.grid(row=0, column=1)
-        ttk.Style().configure('TButton', height=15, width=5, padding=2, relief='flat')
+        ttk.Style().configure('Card.TButton', height=15, width=5, padding=2, relief=FLAT)
 
         self.turn, self.points = 1, 0
         self.submitBool = None
         self.cardsList = self.initialize_cards()
         self.selectedList = []
-        self.set_initial_ui(container)
-        container.after(4000, self.facedown_all)
+        self.set_initial_ui()
+        self.container.after(4000, self.facedown_all)
 
     # function creates all initial GUI components for game window and initializes variables for calculating points
-    def set_initial_ui(self, container):
+    def set_initial_ui(self):
         # initialize vars for calculating points
         self.earlyMatchBonus = True
         self.matchStreak = 0
 
-        self.turnLabel = ttk.Label(container, text='Turn 1 - 0pts')
+        self.turnLabel = ttk.Label(self.container, text='Turn 1 - 0pts')
         self.turnLabel.grid(row=0, column=0, padx=10, pady=10) 
-        self.statusLabel = ttk.Label(container, text='>>Choose a card<<')
+        self.statusLabel = ttk.Label(self.container, text='>>Choose a card<<')
         self.statusLabel.grid(row=0, column=2, columnspan=2, pady=10)
 
         # create buttons and labels used to represent cards and store in list, cards begin face up for first 4s
-        self.cardBtn1 = ttk.Button(container, text=self.cardsList[0].letter, command=lambda:self.reveal(0, container), state=DISABLED)
+        self.cardBtn1 = ttk.Button(self.container, text=self.cardsList[0].letter, command=lambda:self.reveal(0), state=DISABLED, style='Card.TButton')
         self.cardBtn1.grid(row=1, column=1, ipady=30, padx=10)
-        self.cardBtn2 = ttk.Button(container, text=self.cardsList[1].letter, command=lambda:self.reveal(1, container), state=DISABLED)
+        self.cardBtn2 = ttk.Button(self.container, text=self.cardsList[1].letter, command=lambda:self.reveal(1), state=DISABLED, style='Card.TButton')
         self.cardBtn2.grid(row=1, column=2, ipady=30, padx=10)
-        self.cardBtn3 = ttk.Button(container, text=self.cardsList[2].letter, command=lambda:self.reveal(2, container), state=DISABLED)
+        self.cardBtn3 = ttk.Button(self.container, text=self.cardsList[2].letter, command=lambda:self.reveal(2), state=DISABLED, style='Card.TButton')
         self.cardBtn3.grid(row=1, column=3, ipady=30, padx=10)
-        self.cardBtn4 = ttk.Button(container, text=self.cardsList[3].letter, command=lambda:self.reveal(3, container), state=DISABLED)
+        self.cardBtn4 = ttk.Button(self.container, text=self.cardsList[3].letter, command=lambda:self.reveal(3), state=DISABLED, style='Card.TButton')
         self.cardBtn4.grid(row=1, column=4, ipady=30, padx=10)
-        self.cardBtn5 = ttk.Button(container, text=self.cardsList[4].letter, command=lambda:self.reveal(4, container), state=DISABLED)
+        self.cardBtn5 = ttk.Button(self.container, text=self.cardsList[4].letter, command=lambda:self.reveal(4), state=DISABLED, style='Card.TButton')
         self.cardBtn5.grid(row=3, column=1, ipady=30, padx=10)
-        self.cardBtn6 = ttk.Button(container, text=self.cardsList[5].letter, command=lambda:self.reveal(5, container), state=DISABLED)
+        self.cardBtn6 = ttk.Button(self.container, text=self.cardsList[5].letter, command=lambda:self.reveal(5), state=DISABLED, style='Card.TButton')
         self.cardBtn6.grid(row=3, column=2, ipady=30, padx=10)
-        self.cardBtn7 = ttk.Button(container, text=self.cardsList[6].letter, command=lambda:self.reveal(6, container), state=DISABLED)
+        self.cardBtn7 = ttk.Button(self.container, text=self.cardsList[6].letter, command=lambda:self.reveal(6), state=DISABLED, style='Card.TButton')
         self.cardBtn7.grid(row=3, column=3, ipady=30, padx=10)
-        self.cardBtn8 = ttk.Button(container, text=self.cardsList[7].letter, command=lambda:self.reveal(7, container), state=DISABLED)
+        self.cardBtn8 = ttk.Button(self.container, text=self.cardsList[7].letter, command=lambda:self.reveal(7), state=DISABLED, style='Card.TButton')
         self.cardBtn8.grid(row=3, column=4, ipady=30, padx=10)
-        self.cardBtn9 = ttk.Button(container, text=self.cardsList[8].letter, command=lambda:self.reveal(8, container), state=DISABLED)
+        self.cardBtn9 = ttk.Button(self.container, text=self.cardsList[8].letter, command=lambda:self.reveal(8), state=DISABLED, style='Card.TButton')
         self.cardBtn9.grid(row=5, column=1, ipady=30, padx=10)
-        self.cardBtn10 = ttk.Button(container, text=self.cardsList[9].letter, command=lambda:self.reveal(9, container), state=DISABLED)
+        self.cardBtn10 = ttk.Button(self.container, text=self.cardsList[9].letter, command=lambda:self.reveal(9), state=DISABLED, style='Card.TButton')
         self.cardBtn10.grid(row=5, column=2, ipady=30, padx=10)
-        self.cardBtn11 = ttk.Button(container, text=self.cardsList[10].letter, command=lambda:self.reveal(10, container), state=DISABLED)
+        self.cardBtn11 = ttk.Button(self.container, text=self.cardsList[10].letter, command=lambda:self.reveal(10), state=DISABLED, style='Card.TButton')
         self.cardBtn11.grid(row=5, column=3, ipady=30, padx=10)
-        self.cardBtn12 = ttk.Button(container, text=self.cardsList[11].letter, command=lambda:self.reveal(11, container), state=DISABLED)
+        self.cardBtn12 = ttk.Button(self.container, text=self.cardsList[11].letter, command=lambda:self.reveal(11), state=DISABLED, style='Card.TButton')
         self.cardBtn12.grid(row=5, column=4, ipady=30, padx=10)
-        self.cardBtn13 = ttk.Button(container, text=self.cardsList[12].letter, command=lambda:self.reveal(12, container), state=DISABLED)
+        self.cardBtn13 = ttk.Button(self.container, text=self.cardsList[12].letter, command=lambda:self.reveal(12), state=DISABLED, style='Card.TButton')
         self.cardBtn13.grid(row=7, column=1, ipady=30, padx=10)
-        self.cardBtn14 = ttk.Button(container, text=self.cardsList[13].letter, command=lambda:self.reveal(13, container), state=DISABLED)
+        self.cardBtn14 = ttk.Button(self.container, text=self.cardsList[13].letter, command=lambda:self.reveal(13), state=DISABLED, style='Card.TButton')
         self.cardBtn14.grid(row=7, column=2, ipady=30, padx=10)
-        self.cardBtn15 = ttk.Button(container, text=self.cardsList[14].letter, command=lambda:self.reveal(14, container), state=DISABLED)
+        self.cardBtn15 = ttk.Button(self.container, text=self.cardsList[14].letter, command=lambda:self.reveal(14), state=DISABLED, style='Card.TButton')
         self.cardBtn15.grid(row=7, column=3, ipady=30, padx=10)
-        self.cardBtn16 = ttk.Button(container, text=self.cardsList[15].letter, command=lambda:self.reveal(15, container), state=DISABLED)
+        self.cardBtn16 = ttk.Button(self.container, text=self.cardsList[15].letter, command=lambda:self.reveal(15), state=DISABLED, style='Card.TButton')
         self.cardBtn16.grid(row=7, column=4, ipady=30, padx=10)
         
-        self.cardLbl1 = ttk.Label(container, text='Card 1')
+        self.cardLbl1 = ttk.Label(self.container, text='Card 1')
         self.cardLbl1.grid(row=2, column=1, pady=5)
-        self.cardLbl2 = ttk.Label(container, text='Card 2')
+        self.cardLbl2 = ttk.Label(self.container, text='Card 2')
         self.cardLbl2.grid(row=2, column=2, pady=5)
-        self.cardLbl3 = ttk.Label(container, text='Card 3')
+        self.cardLbl3 = ttk.Label(self.container, text='Card 3')
         self.cardLbl3.grid(row=2, column=3, pady=5)
-        self.cardLbl4 = ttk.Label(container, text='Card 4')
+        self.cardLbl4 = ttk.Label(self.container, text='Card 4')
         self.cardLbl4.grid(row=2, column=4, pady=5)
-        self.cardLbl5 = ttk.Label(container, text='Card 5')
+        self.cardLbl5 = ttk.Label(self.container, text='Card 5')
         self.cardLbl5.grid(row=4, column=1, pady=5)
-        self.cardLbl6 = ttk.Label(container, text='Card 6')
+        self.cardLbl6 = ttk.Label(self.container, text='Card 6')
         self.cardLbl6.grid(row=4, column=2, pady=5)
-        self.cardLbl7 = ttk.Label(container, text='Card 7')
+        self.cardLbl7 = ttk.Label(self.container, text='Card 7')
         self.cardLbl7.grid(row=4, column=3, pady=5)
-        self.cardLbl8 = ttk.Label(container, text='Card 8')
+        self.cardLbl8 = ttk.Label(self.container, text='Card 8')
         self.cardLbl8.grid(row=4, column=4, pady=5)
-        self.cardLbl9 = ttk.Label(container, text='Card 9')
+        self.cardLbl9 = ttk.Label(self.container, text='Card 9')
         self.cardLbl9.grid(row=6, column=1, pady=5)
-        self.cardLbl10 = ttk.Label(container, text='Card 10')
+        self.cardLbl10 = ttk.Label(self.container, text='Card 10')
         self.cardLbl10.grid(row=6, column=2, pady=5)
-        self.cardLbl11 = ttk.Label(container, text='Card 11')
+        self.cardLbl11 = ttk.Label(self.container, text='Card 11')
         self.cardLbl11.grid(row=6, column=3, pady=5)
-        self.cardLbl12 = ttk.Label(container, text='Card 12')
+        self.cardLbl12 = ttk.Label(self.container, text='Card 12')
         self.cardLbl12.grid(row=6, column=4, pady=5)
-        self.cardLbl13 = ttk.Label(container, text='Card 13')
+        self.cardLbl13 = ttk.Label(self.container, text='Card 13')
         self.cardLbl13.grid(row=8, column=1, pady=5)
-        self.cardLbl14 = ttk.Label(container, text='Card 14')
+        self.cardLbl14 = ttk.Label(self.container, text='Card 14')
         self.cardLbl14.grid(row=8, column=2, pady=5)
-        self.cardLbl15 = ttk.Label(container, text='Card 15')
+        self.cardLbl15 = ttk.Label(self.container, text='Card 15')
         self.cardLbl15.grid(row=8, column=3, pady=5)
-        self.cardLbl16 = ttk.Label(container, text='Card 16')
+        self.cardLbl16 = ttk.Label(self.container, text='Card 16')
         self.cardLbl16.grid(row=8, column=4, pady=5)
         self.cardBtnList = [self.cardBtn1, self.cardBtn2, self.cardBtn3, self.cardBtn4, self.cardBtn5, self.cardBtn6, self.cardBtn7, self.cardBtn8, self.cardBtn9, self.cardBtn10, self.cardBtn11, self.cardBtn12, self.cardBtn13, self.cardBtn14, self.cardBtn15, self.cardBtn16]
         self.CardLblList = [self.cardLbl1, self.cardLbl2, self.cardLbl3, self.cardLbl4, self.cardLbl5, self.cardLbl7, self.cardLbl8, self.cardLbl9, self.cardLbl10, self.cardLbl11, self.cardLbl12, self.cardLbl13, self.cardLbl14, self.cardLbl15, self.cardLbl16]
@@ -133,7 +134,7 @@ class Window(ttk.LabelFrame):
             b.configure(text='?', state=NORMAL)
     
     # when a card is selected (button pressed), show its letter and set state to disabled
-    def reveal(self, index, container):
+    def reveal(self, index):
         self.cardBtnList[index].configure(text=self.cardsList[index].letter, state=DISABLED)
         self.cardsList[index].set_selected()
         self.selectedList.append(index)
@@ -141,7 +142,7 @@ class Window(ttk.LabelFrame):
         if len(self.selectedList) == 1:
             self.update_statusLabel('>>Choose a second card<<')
         if len(self.selectedList) == 2:
-            self.check_pair_match(container)
+            self.check_pair_match()
         if len(self.selectedList) > 2:
             self.reset_selected()
 
@@ -179,7 +180,7 @@ class Window(ttk.LabelFrame):
         return list(random.sample(cards, numCards))
 
     # function returns true if the 2 selected cards have matching letters, otherwise returns false
-    def check_pair_match(self, container):
+    def check_pair_match(self):
         # selected cards match, update GUI and points
         if self.cardsList[self.selectedList[0]].letter == self.cardsList[self.selectedList[1]].letter:
             self.update_statusLabel('>>You found a match! Choose another card<<')
@@ -187,8 +188,8 @@ class Window(ttk.LabelFrame):
             self.cardsList[self.selectedList[1]].set_unselected()
             self.cardsList[self.selectedList[0]].set_matched()
             self.cardsList[self.selectedList[1]].set_matched()
-            self.cardBtnList[self.selectedList[0]].configure(text=f'{self.cardsList[self.selectedList[0]].letter.center(10)}\n[matched]')
-            self.cardBtnList[self.selectedList[1]].configure(text=f'{self.cardsList[self.selectedList[1]].letter.center(10)}\n[matched]')
+            self.cardBtnList[self.selectedList[0]].configure(text=f'{self.cardsList[self.selectedList[0]].letter.center(10)}')
+            self.cardBtnList[self.selectedList[1]].configure(text=f'{self.cardsList[self.selectedList[1]].letter.center(10)}')
             self.points += self.add_points()
             self.matchStreak += 1
             self.selectedList.clear()
@@ -196,7 +197,7 @@ class Window(ttk.LabelFrame):
         else:
             self.earlyMatchBonus = False
             self.matchStreak = 0
-            container.after(500, self.unreveal)
+            self.container.after(500, self.unreveal)
             self.update_statusLabel('>>Choose a card<<')
         
         # check if all cards have been matched (game over)
@@ -204,7 +205,7 @@ class Window(ttk.LabelFrame):
             self.statusLabel.configure(text='Congradulations you found all the matching cards!')
             self.submitBool = messagebox.askyesno('Submit Score', 'Do you want to submit your score to be placed on the high scores ranking?')
             # show menu frame with replay and quit buttons and high scores
-            container.show_menu()
+            self.container.show_menu()
         self.turn += 1
         self.update_turnLabel()
 
@@ -232,27 +233,37 @@ class Window(ttk.LabelFrame):
 # occupies left side of app window once player completes game
 class MainMenu(ttk.LabelFrame):
     def __init__(self, container, turn, points, submitBool):
-        menuFrame = tk.Frame(container, bd=3, relief='groove', title='Menu')
-        ttk.Style().configure('Menu.TLabelframe', relief='groove')
-        super().__init__(container, labelwidget=menuFrame ,style='Menu.TLabelframe')
-        self.grid(row=0, column=0, rowspan=8)
+        self.container = container
+        menuFrame = tk.Frame(self.container)
+        ttk.Style().configure('Menu.TLabelframe', relief=GROOVE, bd=5)
+        super().__init__(self.container, text='Menu', labelwidget=menuFrame, style='Menu.TLabelframe')
+        self.grid(row=0, column=0)
 
         self.replayBtn = ttk.Button(self, text='Play Again', command=self.reset_game)
-        self.replayBtn.grid(row=0, column=0)
+        self.replayBtn.grid(row=2, column=0, padx=5, pady=5)
         self.quitBtn = ttk.Button(self, text='Quit', command=exit)
-        self.quitBtn.grid(row=1, column=0, padx=8, pady=8)
+        self.quitBtn.grid(row=3, column=0, padx=5, pady=5)
 
         if submitBool:
             self.nameEntry = ttk.Entry(self)
-            self.nameEntry.grid(row=2, column=0, rowspan=2)
-            self.nameEntry.insert(0, 'Enter username')
-            self.submitBtn = ttk.Button(container, text='Submit', command=self.submit_score, args=(turn, points))
-            self.submitBtn.grid(row=3, column=0)
+            self.nameEntry.grid(row=5, column=0)
+            self.nameEntry.insert(0, 'Username')
+            self.submitBtn = ttk.Button(self, text='Submit', command=lambda: self.submit_score(turn, points))
+            self.submitBtn.grid(row=6, column=0)
         
-        self.display_top_scores()
+        self.display_scores()
     
+    # function creates another labelframe for high scores, contained inside main menu labelframe
+    def display_scores(self):
+        hsFrame = tk.Frame(self)
+        ttk.Style().configure('HSTable.TLabelframe', relief=SUNKEN, bd=3)
+        hsLabelFrame = ttk.LabelFrame(self, text='Top Scores', labelwidget=hsFrame, style='HSTable.TLabelframe')
+        hsLabelFrame.grid(row=7, column=0)
+        self.get_scores()
+
+
     # function reads through highscores.txt line by line and stores strings in a list
-    def display_top_scores(self):
+    def get_scores(self):
         self.scoresList = []
         with open('highscores.txt') as fp:
             content = fp.read().splitlines()
@@ -264,9 +275,8 @@ class MainMenu(ttk.LabelFrame):
 
     # function writes current player username, points, and turn to highscores.txt
     def submit_score(self, turn, points):
-        fp = open('highscores.txt', 'a')
-        fp.write(f'{self.nameEntry.get()} {points} {turn}\n')
-        fp.close()
+        with open('highscores.txt') as fp:
+            fp.write(f'{self.nameEntry.get()} {points} {turn}\n')
 
     def reset_game(self):
         pass
