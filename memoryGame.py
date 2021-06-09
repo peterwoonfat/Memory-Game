@@ -10,8 +10,7 @@ from tkinter import ttk
 from tkinter import messagebox
 from tkinter.constants import DISABLED, NORMAL
 
-# parent class for all GUI components of 2 other frames
-# add changing between frames (intro w/ rules, game, scoreboard) in future
+# parent class for all GUI components of other 2 frames
 class App(tk.Tk):
     def __init__(self):
         super().__init__()
@@ -25,6 +24,8 @@ class App(tk.Tk):
         pass
         self.menuFrame = MainMenu(self, self.gameFrame.turn, self.gameFrame.points, self.gameFrame.submitBool)
 
+# class initializes GUI and backend components for the memory game
+# frame that player interacts with to play
 class Window(ttk.LabelFrame):
     def __init__(self, container):
         gameFrame = tk.Frame(container)
@@ -39,13 +40,18 @@ class Window(ttk.LabelFrame):
         self.set_initial_ui(container)
         container.after(4000, self.facedown_all)
 
+    # function creates all initial GUI components for game window and initializes variables for calculating points
     def set_initial_ui(self, container):
+        # initialize vars for calculating points
+        self.earlyMatchBonus = True
+        self.matchStreak = 0
+
         self.turnLabel = ttk.Label(container, text='Turn 1 - 0pts')
         self.turnLabel.grid(row=0, column=0, padx=10, pady=10) 
         self.statusLabel = ttk.Label(container, text='>>Choose a card<<')
         self.statusLabel.grid(row=0, column=2, columnspan=2, pady=10)
 
-        # declare buttons and labels used to represent cards and store in list, cards begin face up for first 5s
+        # create buttons and labels used to represent cards and store in list, cards begin face up for first 4s
         self.cardBtn1 = ttk.Button(container, text=self.cardsList[0].letter, command=lambda:self.reveal(0, container), state=DISABLED)
         self.cardBtn1.grid(row=1, column=1, ipady=30, padx=10)
         self.cardBtn2 = ttk.Button(container, text=self.cardsList[1].letter, command=lambda:self.reveal(1, container), state=DISABLED)
@@ -125,22 +131,6 @@ class Window(ttk.LabelFrame):
     def facedown_all(self):
         for b in self.cardBtnList:
             b.configure(text='?', state=NORMAL)
-        # self.cardBtn1.configure(text='?', state=NORMAL)
-        # self.cardBtn2.configure(text='?', state=NORMAL)
-        # self.cardBtn3.configure(text='?', state=NORMAL)
-        # self.cardBtn4.configure(text='?', state=NORMAL)
-        # self.cardBtn5.configure(text='?', state=NORMAL)
-        # self.cardBtn6.configure(text='?', state=NORMAL)
-        # self.cardBtn7.configure(text='?', state=NORMAL)
-        # self.cardBtn8.configure(text='?', state=NORMAL)
-        # self.cardBtn9.configure(text='?', state=NORMAL)
-        # self.cardBtn10.configure(text='?', state=NORMAL)
-        # self.cardBtn11.configure(text='?', state=NORMAL)
-        # self.cardBtn12.configure(text='?', state=NORMAL)
-        # self.cardBtn13.configure(text='?', state=NORMAL)
-        # self.cardBtn14.configure(text='?', state=NORMAL)
-        # self.cardBtn15.configure(text='?', state=NORMAL)
-        # self.cardBtn16.configure(text='?', state=NORMAL)
     
     # when a card is selected (button pressed), show its letter and set state to disabled
     def reveal(self, index, container):
@@ -155,6 +145,7 @@ class Window(ttk.LabelFrame):
         if len(self.selectedList) > 2:
             self.reset_selected()
 
+    # function sets cards back facedown after unsuccessful match
     def unreveal(self):
         self.cardBtnList[self.selectedList[0]].configure(text='?', state=NORMAL)
         self.cardBtnList[self.selectedList[1]].configure(text='?', state=NORMAL)
@@ -189,6 +180,7 @@ class Window(ttk.LabelFrame):
 
     # function returns true if the 2 selected cards have matching letters, otherwise returns false
     def check_pair_match(self, container):
+        # selected cards match, update GUI and points
         if self.cardsList[self.selectedList[0]].letter == self.cardsList[self.selectedList[1]].letter:
             self.update_statusLabel('>>You found a match! Choose another card<<')
             self.cardsList[self.selectedList[0]].set_unselected()
@@ -197,14 +189,21 @@ class Window(ttk.LabelFrame):
             self.cardsList[self.selectedList[1]].set_matched()
             self.cardBtnList[self.selectedList[0]].configure(text=f'{self.cardsList[self.selectedList[0]].letter.center(10)}\n[matched]')
             self.cardBtnList[self.selectedList[1]].configure(text=f'{self.cardsList[self.selectedList[1]].letter.center(10)}\n[matched]')
-            self.points += 1
+            self.points += self.add_points()
+            self.matchStreak += 1
             self.selectedList.clear()
+        # selected cards do not match, reset matchStreak
         else:
+            self.earlyMatchBonus = False
+            self.matchStreak = 0
             container.after(500, self.unreveal)
             self.update_statusLabel('>>Choose a card<<')
+        
+        # check if all cards have been matched (game over)
         if self.check_all_matched():
             self.statusLabel.configure(text='Congradulations you found all the matching cards!')
             self.submitBool = messagebox.askyesno('Submit Score', 'Do you want to submit your score to be placed on the high scores ranking?')
+            # show menu frame with replay and quit buttons and high scores
             container.show_menu()
         self.turn += 1
         self.update_turnLabel()
@@ -216,16 +215,24 @@ class Window(ttk.LabelFrame):
                 return False
         return True
 
-    # function disables all buttons so user can not choose more than 3 at once
-    # NOT WORKING PROPERLY
+    # function checks if player has selected more than 2 cards at once and sets extras back to normal
     def reset_selected(self):
         for i in self.selectedList[2:]:
             self.cardsList[i].set_unselected()
             self.cardBtnList[i].configure(text='?', state=NORMAL)
 
+    # function calculates the amount of points the player should be given based on set of rules
+    def add_points(self):
+        pointsCalculated = 1 + self.matchStreak
+        if self.earlyMatchBonus:
+            pointsCalculated += 3
+        return pointsCalculated
+
+# class initializes components for the high scores labelframe
+# occupies left side of app window once player completes game
 class MainMenu(ttk.LabelFrame):
     def __init__(self, container, turn, points, submitBool):
-        menuFrame = tk.Frame(container, bd=3, relief='groove')
+        menuFrame = tk.Frame(container, bd=3, relief='groove', title='Menu')
         ttk.Style().configure('Menu.TLabelframe', relief='groove')
         super().__init__(container, labelwidget=menuFrame ,style='Menu.TLabelframe')
         self.grid(row=0, column=0, rowspan=8)
@@ -242,13 +249,24 @@ class MainMenu(ttk.LabelFrame):
             self.submitBtn = ttk.Button(container, text='Submit', command=self.submit_score, args=(turn, points))
             self.submitBtn.grid(row=3, column=0)
         
-        self.HSFile = open('highscores.txt', 'r')
-        self.HSFile.close()
+        self.display_top_scores()
+    
+    # function reads through highscores.txt line by line and stores strings in a list
+    def display_top_scores(self):
+        self.scoresList = []
+        with open('highscores.txt') as fp:
+            content = fp.read().splitlines()
+        
+        for line in content:
+            self.scoresList.append(line.split(3))
+        for s in self.scoresList:
+            s[1] = int(s[1])
 
+    # function writes current player username, points, and turn to highscores.txt
     def submit_score(self, turn, points):
-        self.HSFile = open('highscores.txt', 'a')
-        self.HSFile.write(f'{self.nameEntry.get()} {points} {turn}\n')
-        self.HSFile.close()
+        fp = open('highscores.txt', 'a')
+        fp.write(f'{self.nameEntry.get()} {points} {turn}\n')
+        fp.close()
 
     def reset_game(self):
         pass
