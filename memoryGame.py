@@ -233,14 +233,14 @@ class Window(tk.Frame):
 class MainMenu(tk.Frame):
     def __init__(self, container, turn, points, submitBool):
         self.container = container
-        ttk.Style().configure('Menu.TLabelframe', relief=GROOVE, bd=5)
-        super().__init__(self.container, text='Menu', style='Menu.TLabelframe')
+        super().__init__(self.container)
         self.grid(row=0, column=0)
 
         self.set_menu_buttons()
         if submitBool:
             self.turn = turn
             self.points = points
+            self.set_menu_entry()
         
         self.display_scores()
     
@@ -255,27 +255,69 @@ class MainMenu(tk.Frame):
     def set_menu_entry(self):
         username = tk.StringVar()
         self.nameEntry = ttk.Entry(self, textvariable=username)
-        self.nameEntry.grid(row=3)
+        self.nameEntry.insert(0, 'Username')
+        self.nameEntry.grid(row=2, rowspan=2, sticky='s')
         self.nameEntry.focus()
         self.submitBtn = ttk.Button(self, text='Submit', command=lambda: self.submit_score(username, self.turn, self.points))
         self.submitBtn.grid(row=4)
 
     # function creates another labelframe for high scores, contained inside main menu labelframe
     def display_scores(self):
-        hsLabelFrame = ttk.LabelFrame(self, text='Top Scores', style='HSTable.TLabelframe', relief=SUNKEN, bd=3)
-        hsLabelFrame.grid(row=5, column=0)
+        ttk.Style().configure('HSTable.TLabelframe', relief=SUNKEN, bd=4)
+        hsLabelFrame = ttk.LabelFrame(self, text='Top Scores', style='HSTable.TLabelframe')
+        hsLabelFrame.grid(row=5)
         self.get_scores()
 
-    # function reads through highscores.txt line by line and stores strings in a list
+        self.scoreLbl1 = ttk.Label(hsLabelFrame, text=f'1. name - pts [turn]')
+        self.scoreLbl1.grid(row=0)
+        self.scoreLbl1 = ttk.Label(hsLabelFrame, text=f'2. name - pts [turn]')
+        self.scoreLbl1.grid(row=1)
+        self.scoreLbl1 = ttk.Label(hsLabelFrame, text=f'3. name - pts [turn]')
+        self.scoreLbl1.grid(row=2)
+        self.scoreLbl1 = ttk.Label(hsLabelFrame, text=f'4. name - pts [turn]')
+        self.scoreLbl1.grid(row=3)
+        self.scoreLbl1 = ttk.Label(hsLabelFrame, text=f'5. name - pts [turn]')
+        self.scoreLbl1.grid(row=4)
+
+    # function reads through highscores.txt line by line and stores top 5 scores in a list of tuples to display
     def get_scores(self):
-        self.scoresList = []
+        self.usernameList = []
+        self.pointsList = []
+        self.turnList = []
+        self.topScoresList = []
+
         with open('highscores.txt') as fp:
-            content = fp.read().splitlines()
+            dataLine = fp.readline().splitlines()
+            while dataLine[0] != '':
+                dataLine = dataLine[0].split()
+                self.usernameList.append(dataLine[0])
+                self.pointsList.append(dataLine[1])
+                self.turnList.append(dataLine[2])
+                dataLine = fp.readline().splitlines()
         
-        for line in content:
-            self.scoresList.append(line.split(3))
-        for s in self.scoresList:
-            s[1] = int(s[1])
+        self.str_to_int()
+
+        for i in range(5):
+            topScore = 0
+            for p in self.pointsList:
+                if p > topScore:
+                    topScore = p
+                    
+
+        for i in range(5):
+            self.topScoresList.append(self.scoresList[0][1])
+            for s in self.scoresList:
+                if s[1] > self.topScoresList[i][1]:
+                    self.topScoresList.pop(i)
+                    self.topScoresList.insert(s, i)
+
+    # function converts the all score strings in list to int data types
+    def str_to_int(self):
+        for s in self.pointsList:
+            try:
+                s = int(s)
+            except ValueError:
+                s = 0
 
     # function writes current player username, points, and turn to highscores.txt
     def submit_score(self, username, turn, points):
