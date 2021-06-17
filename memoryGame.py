@@ -288,29 +288,30 @@ class MainMenu(tk.Frame):
 
         with open('highscores.txt', 'r') as fp:
             readCounter = 1
-            dataLine = fp.readline()
-            while dataLine != '':
+
+            while True:
+                dataLine = fp.readline()
+                if dataLine == '': break
+
                 dataLine.replace('\n', '')
                 if readCounter == 1:
                     self.usernameList.append(dataLine)
                     readCounter = 2
-                if readCounter == 2:
-                    tmpNum = 0
+                elif readCounter == 2:
                     try:
                         self.pointsList.append(int(dataLine))
                     except ValueError:
                         self.pointsList.append(0)
                     readCounter = 3
-                if readCounter == 3:
+                elif readCounter == 3:
                     self.turnList.append(dataLine)
                     readCounter = 1
-                dataLine = fp.readline()
 
-        for i in range(5):
+        for i in range(4):
             topScore = 0
             topScoreIndex = 0
-            print(len(self.pointsList))
             for j in range(len(self.pointsList)):
+                print(j)
                 if self.pointsList[j] > topScore:
                     topScore = self.pointsList[j]
                     topScoreIndex = j
