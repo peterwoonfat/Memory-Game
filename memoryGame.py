@@ -311,13 +311,9 @@ class MainMenu(tk.Frame):
             topScore = 0
             topScoreIndex = 0
             for j in range(len(self.pointsList)):
-                print(j)
-                if self.pointsList[j] > topScore:
+                if self.pointsList[j] > topScore and self.pointsList.count(j) == 0:
                     topScore = self.pointsList[j]
                     topScoreIndex = j
-                    self.usernameList.pop(j)
-                    self.pointsList.pop(j)
-                    self.turnList.pop(j)
             self.topScoresList.insert(i, topScoreIndex)
 
     # function writes current player username, points, and turn to highscores.txt
