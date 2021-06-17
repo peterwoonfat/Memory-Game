@@ -8,7 +8,7 @@ import random
 import tkinter as tk
 from tkinter import ttk
 from tkinter import messagebox
-from tkinter.constants import DISABLED, FLAT, GROOVE, NORMAL, SUNKEN
+from tkinter.constants import DISABLED, FLAT, NORMAL, SUNKEN
 
 # parent class for all GUI components of other 2 frames
 class App(tk.Tk):
@@ -286,21 +286,30 @@ class MainMenu(tk.Frame):
         self.turnList = []
         self.topScoresList = []
 
-        with open('highscores.txt') as fp:
+        with open('highscores.txt', 'r') as fp:
+            readCounter = 1
             dataLine = fp.readline()
-            dataLine.replace('\n', '')
-            dataList = []
             while dataLine != '':
-                dataList = dataLine.split()
-                self.usernameList.append(dataList[0])
-                self.pointsList.append(int(dataList[1]))
-                self.turnList.append(dataList[2])
-                dataList.clear()
+                dataLine.replace('\n', '')
+                if readCounter == 1:
+                    self.usernameList.append(dataLine)
+                    readCounter = 2
+                if readCounter == 2:
+                    tmpNum = 0
+                    try:
+                        self.pointsList.append(int(dataLine))
+                    except ValueError:
+                        self.pointsList.append(0)
+                    readCounter = 3
+                if readCounter == 3:
+                    self.turnList.append(dataLine)
+                    readCounter = 1
                 dataLine = fp.readline()
 
         for i in range(5):
             topScore = 0
             topScoreIndex = 0
+            print(len(self.pointsList))
             for j in range(len(self.pointsList)):
                 if self.pointsList[j] > topScore:
                     topScore = self.pointsList[j]
@@ -313,7 +322,7 @@ class MainMenu(tk.Frame):
     # function writes current player username, points, and turn to highscores.txt
     def submit_score(self, username, turn, points):
         with open('highscores.txt', 'a') as fp:
-            fp.write(f'{username} {points} {turn}\n')
+            fp.write(f'{username}\n{points}\n{turn}\n')
 
     def reset_game(self):
         pass
