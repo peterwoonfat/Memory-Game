@@ -17,12 +17,12 @@ class App(tk.Tk):
         self.title('MEMORY GAME')
         self.resizable(False, False)
 
-        self.gameFrame = Window(self)
+        self.frames = {}
+        self.frames[0] = Window(self)
 
     # function makes menu frame visible
     def show_menu(self):
-        self.gameFrame.destroy()
-        self.menuFrame = MainMenu(self, self.gameFrame.turn, self.gameFrame.points, self.gameFrame.submitBool)
+        self.frames[1] = MainMenu(self, self.frames[0].turn, self.frames[0].points, self.frames[0].submitBool)
 
 # class initializes GUI and backend components for the memory game
 # frame that player interacts with to play
@@ -201,7 +201,7 @@ class Window(tk.Frame):
         
         # check if all cards have been matched (game over)
         if self.check_all_matched():
-            self.statusLabel.configure(text='Congradulations you found all the matching cards!')
+            self.statusLabel.configure(text='Congratulations you found all the matching cards!')
             self.submitBool = messagebox.askyesno('Submit Score', 'Do you want to submit your score to be placed on the high scores ranking?')
             # show menu frame with replay and quit buttons and high scores
             self.container.show_menu()
@@ -256,16 +256,16 @@ class MainMenu(tk.Frame):
     def set_menu_entry(self):
         self.nameEntry = ttk.Entry(self)
         self.nameEntry.insert(0, 'Username')
-        self.nameEntry.grid(row=2, rowspan=2, sticky='s')
+        self.nameEntry.grid(row=2, rowspan=3, sticky='s')
         self.nameEntry.focus()
         self.submitBtn = ttk.Button(self, text='Submit', command=lambda: self.submit_score(self.nameEntry.get(), self.turn, self.points))
-        self.submitBtn.grid(row=4)
+        self.submitBtn.grid(row=5)
 
     # function creates another labelframe for high scores, contained inside main menu labelframe
     def display_scores(self):
         ttk.Style().configure('HSTable.TLabelframe', relief=SUNKEN, bd=4)
         hsLabelFrame = ttk.LabelFrame(self, text='Top Scores', style='HSTable.TLabelframe')
-        hsLabelFrame.grid(row=5)
+        hsLabelFrame.grid(row=6, rowspan=4)
         self.get_scores()
 
         self.scoreLbl1 = ttk.Label(hsLabelFrame, text=f'1. {self.usernameList[self.topScoresList[0]]} - {self.pointsList[self.topScoresList[0]]}pts [turn {self.turnList[self.topScoresList[0]]}]')
@@ -307,7 +307,7 @@ class MainMenu(tk.Frame):
                     self.turnList.append(dataLine)
                     readCounter = 1
 
-        for i in range(4):
+        for i in range(5):
             topScore = 0
             topScoreIndex = 0
             for j in range(len(self.pointsList)):
