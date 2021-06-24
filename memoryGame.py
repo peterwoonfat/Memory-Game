@@ -380,10 +380,14 @@ class Card:
 # function creates a message box telling the player the rules before game begins
 def show_rules():
     messagebox.showinfo('RULES', '''
-    Welcome to Peter's Memory Game!
-    There are 8 pairs of cards with matching letters
-    Find the matching pairs to earn points within the least amount of turns!
-    Remember you can only turn over 2 cards at a time
+                    Welcome to Peter's Memory Game!
+          There are 8 pairs of cards with matching letters
+                Find the matching pairs to earn points 
+                within the least amount of turns!
+               (Matches made on the first turn and 
+               consecutive matches give extra points)
+          Remember you can only turn over 2 cards at a time
+
 
     >>When you press okay you will have 5 seconds to memorize the cards' positions<<
     ''')
