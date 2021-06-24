@@ -22,7 +22,13 @@ class App(tk.Tk):
 
     # function makes menu frame visible
     def show_menu(self):
-        self.frames[1] = MainMenu(self, self.frames[0].turn, self.frames[0].points, self.frames[0].submitBool)
+        self.frames[1] = MainMenu(self, self.frames[0].turn, self.frames[0].points)
+
+    # function removes menu from window and reinitializes cards to start a new instance of the game
+    def reset_game(self):
+        self.frames[0].destroy()
+        self.frames[1].destroy()
+        self.frames[0] = Window(self)
 
 # class initializes GUI and backend components for the memory game
 # frame that player interacts with to play
@@ -34,7 +40,6 @@ class Window(tk.Frame):
         ttk.Style().configure('Card.TButton', height=15, width=5, padding=2, relief=FLAT)
 
         self.turn, self.points = 1, 0
-        self.submitBool = None
         self.cardsList = self.initialize_cards()
         self.selectedList = []
         self.set_initial_ui()
@@ -202,7 +207,6 @@ class Window(tk.Frame):
         # check if all cards have been matched (game over)
         if self.check_all_matched():
             self.statusLabel.configure(text='Congratulations you found all the matching cards!')
-            self.submitBool = messagebox.askyesno('Submit Score', 'Do you want to submit your score to be placed on the high scores ranking?')
             # show menu frame with replay and quit buttons and high scores
             self.container.show_menu()
         else:
@@ -232,22 +236,21 @@ class Window(tk.Frame):
 # class initializes components for the high scores labelframe
 # occupies left side of app window once player completes game
 class MainMenu(tk.Frame):
-    def __init__(self, container, turn, points, submitBool):
+    def __init__(self, container, turn, points):
         self.container = container
         super().__init__(self.container)
         self.grid(row=0, column=0)
 
         self.set_menu_buttons()
-        if submitBool:
-            self.turn = turn
-            self.points = points
-            self.set_menu_entry()
+        self.turn = turn
+        self.points = points
+        self.set_menu_entry()
         
         self.display_scores()
     
     # function creates play again and reset buttons
     def set_menu_buttons(self):
-        self.playAgainBtn = ttk.Button(self, text='Play Again')
+        self.playAgainBtn = ttk.Button(self, text='Play Again', command=self.container.reset_game)
         self.playAgainBtn.grid(row=0, padx=10, pady=10)
         self.quitBtn = ttk.Button(self, text='Quit', command=quit)
         self.quitBtn.grid(row=1, padx=10, pady=10)
@@ -265,7 +268,7 @@ class MainMenu(tk.Frame):
     def display_scores(self):
         ttk.Style().configure('HSTable.TLabelframe', relief=SUNKEN, bd=4)
         hsLabelFrame = ttk.LabelFrame(self, text='Top Scores', style='HSTable.TLabelframe')
-        hsLabelFrame.grid(row=6, rowspan=4)
+        hsLabelFrame.grid(row=7)
         self.get_scores()
 
         self.scoreLbl1 = ttk.Label(hsLabelFrame, text=f'1. {self.usernameList[self.topScoresList[0]]} - {self.pointsList[self.topScoresList[0]]}pts [turn {self.turnList[self.topScoresList[0]]}]')
@@ -320,9 +323,6 @@ class MainMenu(tk.Frame):
     def submit_score(self, username, turn, points):
         with open('highscores.txt', 'a') as fp:
             fp.write(f'{username}\n{points}\n{turn}\n')
-
-    def reset_game(self):
-        pass
 
 # declare class for card objects
 # player can select up to 2 cards at once, stored in a list
