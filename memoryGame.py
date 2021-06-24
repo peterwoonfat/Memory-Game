@@ -271,16 +271,40 @@ class MainMenu(tk.Frame):
         hsLabelFrame.grid(row=7)
         self.get_scores()
 
-        self.scoreLbl1 = ttk.Label(hsLabelFrame, text=f'1. {self.usernameList[self.topScoresList[0]]} - {self.pointsList[self.topScoresList[0]]}pts [turn {self.turnList[self.topScoresList[0]]}]')
-        self.scoreLbl1.grid(row=0)
-        self.scoreLbl1 = ttk.Label(hsLabelFrame, text=f'2. {self.usernameList[self.topScoresList[1]]} - {self.pointsList[self.topScoresList[1]]}pts [turn {self.turnList[self.topScoresList[1]]}]')
-        self.scoreLbl1.grid(row=1)
-        self.scoreLbl1 = ttk.Label(hsLabelFrame, text=f'3. {self.usernameList[self.topScoresList[2]]} - {self.pointsList[self.topScoresList[2]]}pts [turn {self.turnList[self.topScoresList[2]]}]')
-        self.scoreLbl1.grid(row=2)
-        self.scoreLbl1 = ttk.Label(hsLabelFrame, text=f'4. {self.usernameList[self.topScoresList[3]]} - {self.pointsList[self.topScoresList[3]]}pts [turn {self.turnList[self.topScoresList[3]]}]')
-        self.scoreLbl1.grid(row=3)
-        self.scoreLbl1 = ttk.Label(hsLabelFrame, text=f'5. {self.usernameList[self.topScoresList[4]]} - {self.pointsList[self.topScoresList[4]]}pts [turn {self.turnList[self.topScoresList[4]]}]')
-        self.scoreLbl1.grid(row=4)
+        try:
+            self.scoreLbl1 = ttk.Label(hsLabelFrame, text=f'1. {self.usernameList[self.topScoresList[0]]} - {self.pointsList[self.topScoresList[0]]}pts [turn {self.turnList[self.topScoresList[0]]}]')
+            self.scoreLbl1.grid(row=0)
+        except IndexError:
+            self.scoreLbl1 = ttk.Label(hsLabelFrame, text='1. -----')
+            self.scoreLbl1.grid(row=0)
+        
+        try:
+            self.scoreLbl1 = ttk.Label(hsLabelFrame, text=f'2. {self.usernameList[self.topScoresList[1]]} - {self.pointsList[self.topScoresList[1]]}pts [turn {self.turnList[self.topScoresList[1]]}]')
+            self.scoreLbl1.grid(row=1)
+        except IndexError:
+            self.scoreLbl1 = ttk.Label(hsLabelFrame, text='2. -----')
+            self.scoreLbl1.grid(row=1)
+        
+        try:
+            self.scoreLbl1 = ttk.Label(hsLabelFrame, text=f'3. {self.usernameList[self.topScoresList[2]]} - {self.pointsList[self.topScoresList[2]]}pts [turn {self.turnList[self.topScoresList[1]]}]')
+            self.scoreLbl1.grid(row=2)
+        except IndexError:
+            self.scoreLbl1 = ttk.Label(hsLabelFrame, text='3. -----')
+            self.scoreLbl1.grid(row=2)
+        
+        try:
+            self.scoreLbl1 = ttk.Label(hsLabelFrame, text=f'4. {self.usernameList[self.topScoresList[3]]} - {self.pointsList[self.topScoresList[3]]}pts [turn {self.turnList[self.topScoresList[1]]}]')
+            self.scoreLbl1.grid(row=3)
+        except IndexError:
+            self.scoreLbl1 = ttk.Label(hsLabelFrame, text='4. -----')
+            self.scoreLbl1.grid(row=4)
+        
+        try:
+            self.scoreLbl1 = ttk.Label(hsLabelFrame, text=f'5. {self.usernameList[self.topScoresList[4]]} - {self.pointsList[self.topScoresList[4]]}pts [turn {self.turnList[self.topScoresList[0]]}]')
+            self.scoreLbl1.grid(row=5)
+        except IndexError:
+            self.scoreLbl1 = ttk.Label(hsLabelFrame, text='5. -----')
+            self.scoreLbl1.grid(row=5)
 
     # function reads through highscores.txt line by line and stores top 5 scores in a list of tuples to display
     def get_scores(self):
@@ -311,10 +335,11 @@ class MainMenu(tk.Frame):
                     readCounter = 1
 
         for i in range(5):
+            if len(self.pointsList) - i == 0: break
             topScore = 0
             topScoreIndex = 0
             for j in range(len(self.pointsList)):
-                if self.pointsList[j] > topScore and self.pointsList.count(j) == 0:
+                if self.pointsList[j] > topScore and self.topScoresList.count(j) == 0:
                     topScore = self.pointsList[j]
                     topScoreIndex = j
             self.topScoresList.insert(i, topScoreIndex)
